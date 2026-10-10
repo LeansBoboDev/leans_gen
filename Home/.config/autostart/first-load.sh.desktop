@@ -1,6 +1,0 @@
-[Desktop Entry]
-Exec=/usr/share/leans/scripts/first-load.sh
-Icon=application-x-shellscript
-Name=first-load.sh
-Type=Application
-X-KDE-AutostartScript=true

@@ -70,11 +70,20 @@ in
     wrappedBinaries = lib.mapAttrs mkWrapped firejailHomeApps;
   };
 
+  # Firejail's `--env=HOME=...` only sets the env var -- it never creates
+  # the directory it points to. Without a pre-existing dotfolder to
+  # migrate (see below), an app's fake home would never exist on first
+  # run and it'd fail trying to write into it (e.g. Steam's `mkdir
+  # .steam` failing because its fakeHome parent dir is missing). So
+  # always ensure fakeHome exists up front, regardless of migration.
+  #
   # One-time migration: move any pre-existing data from its old spot in
   # the real $HOME into the app's fake home, so nothing is lost and
   # nothing is left behind at the original path.
   system.activationScripts.firejailHomeMigrate = lib.mkAfter (
-    lib.concatMapStrings (app: lib.concatMapStrings (rel: ''
+    lib.concatMapStrings (app: ''
+      install -d -o leans -g users '${app.fakeHome}'
+    '' + lib.concatMapStrings (rel: ''
       from='${home}/${rel}'
       to='${app.fakeHome}/${rel}'
       if [ -e "$from" ] && [ ! -L "$from" ] && [ ! -e "$to" ]; then

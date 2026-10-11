@@ -10,6 +10,8 @@
 	nixpkgs.config.allowUnfreePredicate = pkg:
 		builtins.elem (lib.getName pkg) [
 			"vscode"
+			"steam"
+			"claude-code"
 	];
 
   environment.systemPackages = with pkgs; [

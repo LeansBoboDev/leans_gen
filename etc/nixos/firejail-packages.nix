@@ -29,12 +29,37 @@ let
       fakeHome = "${xdgData}/vscode-home";
       migrate = [ ".vscode" ".config/Code" ];
     };
+
+    claude = {
+      package = pkgs.claude-code;
+      binary = "claude";
+      fakeHome = "${xdgData}/claude-home";
+      migrate = [ ".claude" ];
+    };
+
+    # Firejail auto-loads its own bundled steam.profile by matching the
+    # wrapped binary's basename unless told not to -- that profile's extra
+    # seccomp/device restrictions are a common source of games (especially
+    # anti-cheat titles) refusing to start, so --noprofile keeps this to
+    # just the $HOME redirect. Some anti-cheat games may still refuse to
+    # launch under any namespace sandboxing at all, firejail or not --
+    # that's a Proton/Linux-wide limitation, not something this file can
+    # fix per game.
+    steam = {
+      package = pkgs.steam;
+      binary = "steam";
+      desktopFile = "steam.desktop";
+      fakeHome = "${xdgData}/steam-home";
+      migrate = [ ".steam" ".local/share/Steam" ];
+      extraFirejailArgs = [ "--noprofile" ];
+    };
   };
 
   mkWrapped = _name: app: {
     executable = "${lib.getBin app.package}/bin/${app.binary}";
+    extraArgs = [ "--env=HOME=${app.fakeHome}" ] ++ (app.extraFirejailArgs or [ ]);
+  } // lib.optionalAttrs (app ? desktopFile) {
     desktop = "${app.package}/share/applications/${app.desktopFile}";
-    extraArgs = [ "--env=HOME=${app.fakeHome}" ];
   };
 in
 {

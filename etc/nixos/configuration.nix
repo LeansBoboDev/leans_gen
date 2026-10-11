@@ -7,6 +7,7 @@
       ./hardware-configuration.nix
       ./packages.nix
       ./users.nix
+      ./kde.nix
     ];
 
   # Use the systemd-boot EFI boot loader.
@@ -16,6 +17,8 @@
   networking.hostName = "leansgen";
   networking.networkmanager.enable = true;
   time.timeZone = "Europe/Amsterdam";
+
+  services.libinput.mouse.accelProfile = "flat";
 
   # This option defines the first version of NixOS you have installed on this particular machine,
   # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.

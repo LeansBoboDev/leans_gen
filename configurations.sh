@@ -158,5 +158,151 @@ case "$GPU_LABEL" in
         ;;
 esac
 
+# ---------------------------------------------------------------------------
+# Night Color
+# ---------------------------------------------------------------------------
+
+KDE_FILE="$DEST_DIR/kde.nix"
+
 echo
-echo "Done! Configuration copied and updated at $DEST_DIR"
+echo "==> Night Color (blue light filter)"
+read -rp "Enable Night Color? [Y/n]: " NC_ENABLE
+
+if [[ "$NC_ENABLE" =~ ^[Nn] ]]; then
+    NC_ACTIVE="false"
+else
+    NC_ACTIVE="true"
+    read -rp "Color temperature in Kelvin, lower = warmer (2500-6500) [default: 4100]: " NC_TEMP
+    NC_TEMP="${NC_TEMP:-4100}"
+    if ! [[ "$NC_TEMP" =~ ^[0-9]+$ ]] || (( NC_TEMP < 2500 || NC_TEMP > 6500 )); then
+        echo "Invalid value, using default 4100."
+        NC_TEMP=4100
+    fi
+fi
+
+if [[ -f "$KDE_FILE" ]]; then
+    # Drop the commented template lines shipped in the repo, then insert
+    # the real values right after the kwinrc.Xwayland.Scale anchor.
+    sed -i '/# kwinrc\.NightColor\./d' "$KDE_FILE"
+    if [[ "$NC_ACTIVE" == "true" ]]; then
+        sed -i "/kwinrc\.Xwayland\.Scale = 1;/a\\        kwinrc.NightColor.Active = true;\\n        kwinrc.NightColor.Mode = \"Constant\";\\n        kwinrc.NightColor.NightTemperature = ${NC_TEMP};" "$KDE_FILE"
+    else
+        sed -i "/kwinrc\.Xwayland\.Scale = 1;/a\\        kwinrc.NightColor.Active = false;" "$KDE_FILE"
+    fi
+else
+    echo "Warning: $KDE_FILE not found, skipping Night Color configuration."
+fi
+
+# ---------------------------------------------------------------------------
+# Users
+# ---------------------------------------------------------------------------
+
+USERS_FILE="$DEST_DIR/users.nix"
+
+USERNAMES=()
+DESCRIPTIONS=()
+ADMIN_FLAGS=()
+
+echo
+echo "==> User accounts"
+while true; do
+    read -rp "Username to create (leave empty to finish): " USERNAME
+    if [[ -z "$USERNAME" ]]; then
+        if [[ ${#USERNAMES[@]} -eq 0 ]]; then
+            echo "You must create at least one user."
+            continue
+        fi
+        break
+    fi
+    if [[ ! "$USERNAME" =~ ^[a-z_][a-z0-9_-]*$ ]]; then
+        echo "Invalid username. Use lowercase letters, digits, '-' and '_', starting with a letter or '_'."
+        continue
+    fi
+    if printf '%s\n' "${USERNAMES[@]}" | grep -qx "$USERNAME"; then
+        echo "User '$USERNAME' was already added."
+        continue
+    fi
+
+    read -rp "Full name for $USERNAME [default: $USERNAME]: " DESCRIPTION
+    DESCRIPTION="${DESCRIPTION:-$USERNAME}"
+    DESCRIPTION="${DESCRIPTION//\\/\\\\}"
+    DESCRIPTION="${DESCRIPTION//\"/\\\"}"
+
+    read -rp "Should $USERNAME be an administrator (wheel group)? [Y/n]: " IS_ADMIN
+
+    USERNAMES+=("$USERNAME")
+    DESCRIPTIONS+=("$DESCRIPTION")
+    if [[ "$IS_ADMIN" =~ ^[Nn] ]]; then
+        ADMIN_FLAGS+=("no")
+    else
+        ADMIN_FLAGS+=("yes")
+    fi
+done
+
+echo "==> Writing $USERS_FILE"
+{
+    echo "{ pkgs, ... }:"
+    echo
+    echo "{"
+    for i in "${!USERNAMES[@]}"; do
+        uname="${USERNAMES[$i]}"
+        desc="${DESCRIPTIONS[$i]}"
+        admin="${ADMIN_FLAGS[$i]}"
+
+        groups=(networkmanager audio video vboxusers)
+        if [[ "$admin" == "yes" ]]; then
+            groups=(wheel "${groups[@]}")
+        fi
+        groups_nix=""
+        for g in "${groups[@]}"; do
+            groups_nix+="\"$g\" "
+        done
+        groups_nix="${groups_nix% }"
+
+        echo "  users.users.$uname = {"
+        echo "    isNormalUser = true;"
+        echo "    description = \"$desc\";"
+        echo "    extraGroups = [ $groups_nix ];"
+        echo "    # Set password after install with: passwd $uname"
+        echo "    # Or generate a hash with: mkpasswd -m sha-512"
+        echo "    # initialHashedPassword = \"HASH_HERE\";"
+        echo "  };"
+        echo
+    done
+    echo "}"
+} > "$USERS_FILE"
+
+echo
+echo "Configuration copied and updated at $DEST_DIR"
+
+# ---------------------------------------------------------------------------
+# Install
+# ---------------------------------------------------------------------------
+
+echo
+echo "==> Ready to install NixOS using this configuration."
+read -rp "Run nixos-install now? [Y/n]: " DO_INSTALL
+
+if [[ "$DO_INSTALL" =~ ^[Nn] ]]; then
+    echo "Skipping install. Run 'nixos-install' manually when ready."
+    exit 0
+fi
+
+if nixos-install; then
+    echo
+    echo "==> Install succeeded."
+    # kde.nix (Home Manager/plasma-manager) only needs to run once, to seed
+    # KDE's defaults on first boot. Drop the import now so future
+    # nixos-rebuild switch runs on the installed system no longer enforce
+    # it back over whatever you change by hand afterwards.
+    sed -i '/^\s*\.\/kde\.nix\s*$/d' "$CONFIG_FILE"
+    echo "Removed ./kde.nix from imports in $CONFIG_FILE (KDE defaults applied once on first boot, no longer enforced after)."
+    echo
+    echo "Done! Set a password for each created user, then reboot:"
+    for uname in "${USERNAMES[@]}"; do
+        echo "  nixos-enter --root /mnt -c 'passwd $uname'"
+    done
+else
+    echo "nixos-install failed. $CONFIG_FILE was left unchanged so you can fix the issue and retry." >&2
+    exit 1
+fi

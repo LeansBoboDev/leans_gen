@@ -5,6 +5,8 @@
 	services.displayManager.sddm.enable = true;
 	services.xserver.enable = true;
 
+	virtualisation.virtualbox.host.enable = true;
+
 	nixpkgs.config.allowUnfreePredicate = pkg:
 		builtins.elem (lib.getName pkg) [
 			"vscode"

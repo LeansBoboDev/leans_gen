@@ -60,7 +60,7 @@ in
     # layout (plasma-org.kde.plasma.desktop-appletsrc) — add that by
     # hand under `panels = [ ... ];` below if you want panels/widgets
     # reproduced too.
-    # Last refreshed: 2026-10-11
+    # Last refreshed: 2026-10-12
     programs.plasma = {
       enable = true;
 
@@ -200,9 +200,9 @@ in
         kwin."Switch to Desktop 7" = [ ];
         kwin."Switch to Desktop 8" = [ ];
         kwin."Switch to Desktop 9" = [ ];
-        kwin."Switch to Next Desktop" = [ ];
+        kwin."Switch to Next Desktop" = "Ctrl+Alt+Tab";
         kwin."Switch to Next Screen" = [ ];
-        kwin."Switch to Previous Desktop" = [ ];
+        kwin."Switch to Previous Desktop" = "Ctrl+Alt+Shift+Tab";
         kwin."Switch to Previous Screen" = [ ];
         kwin."Switch to Screen 0" = [ ];
         kwin."Switch to Screen 1" = [ ];
@@ -402,11 +402,12 @@ in
         kiorc.Confirmations.ConfirmEmptyTrash = false;
         krunnerrc.Plugins.baloosearchEnabled = false;
         kwalletrc.Wallet."First Use" = false;
-        kwinrc.Desktops.Number = 1;
+        kwinrc.Desktops.Number = 2;
         kwinrc.Desktops.Rows = 1;
         kwinrc.NightColor.Active = true;
         kwinrc.NightColor.Mode = "Constant";
         kwinrc.NightColor.NightTemperature = 2700;
+        kwinrc.Windows.RollOverDesktops = true;
         kwinrc.Xwayland.Scale = 1;
         kxkbrc.Layout.LayoutList = "br";
         kxkbrc.Layout.Use = true;

@@ -61,6 +61,14 @@ let
       fakeHomeRel = ".local/share/steam-home";
       migrate = [ ".steam" ".local/share/Steam" ];
       extraFirejailArgs = [ "--noprofile" ];
+      # Steam (and anything it launches, including games/Proton) inherits
+      # the fake $HOME above, so MangoHud's default per-user config lookup
+      # ($HOME/.config/MangoHud/MangoHud.conf) would miss the config
+      # home-manager writes into the real $HOME. Point it there directly
+      # instead -- this is a raw, unescaped env assignment (unlike
+      # extraFirejailArgs) because $HOME needs to expand at invocation
+      # time, not build time.
+      extraEnv = [ ''MANGOHUD_CONFIGFILE="$HOME/.config/MangoHud/MangoHud.conf"'' ];
     };
   };
 
@@ -84,7 +92,7 @@ let
         fi
       '') app.migrate}
 
-      exec /run/wrappers/bin/firejail --env=HOME="$fakeHome" ${lib.escapeShellArgs (app.extraFirejailArgs or [ ])} -- ${lib.getBin app.package}/bin/${app.binary} "$@"
+      exec /run/wrappers/bin/firejail --env=HOME="$fakeHome" ${lib.concatMapStrings (e: "--env=" + e + " ") (app.extraEnv or [ ])}${lib.escapeShellArgs (app.extraFirejailArgs or [ ])} -- ${lib.getBin app.package}/bin/${app.binary} "$@"
     '').overrideAttrs
       (old: {
         # Takes precedence over the real package's same-named binary when

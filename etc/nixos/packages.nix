@@ -22,6 +22,7 @@
 
     # Multimedia
     vlc
+    obs-studio
 
 	  # Libraries
 	  direnv # per-project env loading, used by VSCode's direnv extension

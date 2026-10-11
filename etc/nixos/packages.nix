@@ -25,9 +25,6 @@
     unzip
     p7zip
 
-    # Editors
-    vscode
-
     # Multimedia
     vlc
 

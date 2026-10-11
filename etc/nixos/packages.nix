@@ -1,10 +1,18 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
+	services.desktopManager.plasma6.enable = true;
+	services.displayManager.sddm.enable = true;
+	services.xserver.enable = true;
+
+	nixpkgs.config.allowUnfreePredicate = pkg:
+		builtins.elem (lib.getName pkg) [
+			"vscode"
+	];
+
   environment.systemPackages = with pkgs; [
     # Browsers
     firefox
-    google-chrome
 
     # System
     vim
@@ -15,21 +23,13 @@
     unzip
     p7zip
 
-    # KDE apps
-    kate
-    ark
-    dolphin
-    konsole
-    spectacle
+    # Editors
+    vscode
 
     # Multimedia
     vlc
-  ];
 
-  fonts.packages = with pkgs; [
-    noto-fonts
-    noto-fonts-cjk-sans
-    noto-fonts-emoji
-    liberation_ttf
+	  # Libraries
+	  direnv
   ];
 }

@@ -37,6 +37,14 @@ let
       migrate = [ ".claude" ];
     };
 
+    vesktop = {
+      package = pkgs.vesktop;
+      binary = "vesktop";
+      desktopFile = "vesktop.desktop";
+      fakeHome = "${xdgData}/vesktop-home";
+      migrate = [ ".config/vesktop" ];
+    };
+
     # Firejail auto-loads its own bundled steam.profile by matching the
     # wrapped binary's basename unless told not to -- that profile's extra
     # seccomp/device restrictions are a common source of games (especially

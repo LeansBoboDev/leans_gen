@@ -291,12 +291,9 @@ fi
 if nixos-install; then
     echo
     echo "==> Install succeeded."
-    # kde.nix (Home Manager/plasma-manager) only needs to run once, to seed
-    # KDE's defaults on first boot. Drop the import now so future
-    # nixos-rebuild switch runs on the installed system no longer enforce
-    # it back over whatever you change by hand afterwards.
-    sed -i '/^\s*\.\/kde\.nix\s*$/d' "$CONFIG_FILE"
-    echo "Removed ./kde.nix from imports in $CONFIG_FILE (KDE defaults applied once on first boot, no longer enforced after)."
+    # kde.nix stays wired into configuration.nix's imports permanently (it
+    # also carries session-wide environment variables like XCURSOR_THEME
+    # that need to keep applying on every rebuild, not just at first boot).
     echo
     echo "Done! Set a password for each created user, then reboot:"
     for uname in "${USERNAMES[@]}"; do

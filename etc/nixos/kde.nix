@@ -2,17 +2,19 @@
 
 # Declarative KDE Plasma settings via Home Manager + plasma-manager.
 #
-# Workflow to capture YOUR current KDE setup (theme, panels/widgets,
-# shortcuts, etc.) instead of guessing values by hand:
+# Workflow to capture YOUR current KDE setup (shortcuts, configFile
+# tweaks, etc.) instead of guessing values by hand:
 #
 #   1. Set up KDE manually on a live system the way you like it
-#      (theme, widget positions, panels, shortcuts...).
-#   2. Run the rc2nix tool that ships with plasma-manager:
-#        nix run github:nix-community/plasma-manager#rc2nix > kde-dump.nix
-#   3. Copy the relevant attributes it prints (workspace, panels,
-#      shortcuts, kwin, etc.) into the `programs.plasma = { ... }`
-#      block below, replacing/extending the example values.
-#   4. Rebuild: sudo nixos-rebuild switch
+#      (theme, shortcuts, Night Color, touchpad settings...).
+#   2. Run ../../update-kde-nix.sh from the repo root. It dumps your
+#      live config with rc2nix, drops hardware-specific/per-install
+#      noise, and rewrites the `shortcuts`/`configFile` blocks below
+#      in place (see etc/nixos/KDE.md for details).
+#   3. Rebuild: sudo nixos-rebuild switch
+#
+# `panels` (widget layout) isn't captured by rc2nix and must still be
+# added here by hand — see etc/nixos/KDE.md.
 #
 # Docs: https://github.com/nix-community/plasma-manager
 
@@ -29,6 +31,17 @@ in
     "${homeManager}/nixos"
   ];
 
+  # KWin doesn't export the cursor theme/size chosen in System Settings
+  # (kcminputrc) as XCURSOR_THEME/XCURSOR_SIZE for the session. Apps that
+  # resolve the cursor via the "static" libXcursor path instead of the
+  # dynamic Wayland cursor-shape protocol (notably SDL2, which Steam uses)
+  # never see the configured theme and fall back to the plain default X11
+  # cursor. Exporting these matches what's set in kcminputrc.
+  environment.sessionVariables = {
+    XCURSOR_THEME = "breeze_cursors";
+    XCURSOR_SIZE = "24";
+  };
+
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   # Avoids activation failures if a plain dotfile already exists where
@@ -41,11 +54,13 @@ in
     # Keep in sync with system.stateVersion in configuration.nix.
     home.stateVersion = config.system.stateVersion;
 
-    # NOTE: generated with `nix run github:nix-community/plasma-manager#rc2nix`
-    # on 2026-10-11. rc2nix does NOT capture panel/widget layout
-    # (plasma-org.kde.plasma.desktop-appletsrc) — add that by hand under
-    # `panels = [ ... ];` below if you want panels/widgets reproduced too.
-    # Re-run rc2nix any time you want to refresh this from your live system.
+    # `shortcuts`/`configFile` below are generated/refreshed by
+    # ../../update-kde-nix.sh (rc2nix under the hood) — re-run it any
+    # time to pull in live KDE changes. It does NOT capture panel/widget
+    # layout (plasma-org.kde.plasma.desktop-appletsrc) — add that by
+    # hand under `panels = [ ... ];` below if you want panels/widgets
+    # reproduced too.
+    # Last refreshed: 2026-10-11
     programs.plasma = {
       enable = true;
 
@@ -342,12 +357,6 @@ in
         kwinrc.Desktops.Id_1 = "c5553a7f-9255-41ad-9e72-020dfd869b67";
         kwinrc.Desktops.Number = 1;
         kwinrc.Desktops.Rows = 1;
-        # Night Color left out on purpose — it's a personal taste setting,
-        # not something every install should default to. Uncomment if you
-        # want it:
-        # kwinrc.NightColor.Active = true;
-        # kwinrc.NightColor.Mode = "Constant";
-        # kwinrc.NightColor.NightTemperature = 4100;
         kwinrc.Xwayland.Scale = 1;
         kxkbrc.Layout.LayoutList = "br";
         kxkbrc.Layout.Use = true;

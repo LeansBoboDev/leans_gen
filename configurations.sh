@@ -276,6 +276,75 @@ echo
 echo "Configuration copied and updated at $DEST_DIR"
 
 # ---------------------------------------------------------------------------
+# Auto-mount disks
+# ---------------------------------------------------------------------------
+
+MOUNT_POINTS_FILE="$DEST_DIR/mount-points.nix"
+
+echo
+echo "==> Additional disks to auto-mount at boot"
+
+mapfile -t CANDIDATE_PARTS < <(lsblk -rno NAME,TYPE,MOUNTPOINT | awk '$2=="part"{print $1"|"$3}')
+
+MOUNT_ENTRIES=()
+
+for entry in "${CANDIDATE_PARTS[@]}"; do
+    PART_NAME="${entry%%|*}"
+    PART_MOUNT="${entry#*|}"
+    DEV="/dev/$PART_NAME"
+
+    # Skip partitions already in use for this install (mounted under /mnt)
+    case "$PART_MOUNT" in
+        /mnt|/mnt/*) continue ;;
+    esac
+
+    FSTYPE="$(lsblk -no FSTYPE "$DEV" 2>/dev/null)"
+    [[ -z "$FSTYPE" || "$FSTYPE" == "swap" ]] && continue
+
+    UUID="$(blkid -s UUID -o value "$DEV" 2>/dev/null || true)"
+    [[ -z "$UUID" ]] && continue
+
+    LABEL="$(lsblk -no LABEL "$DEV" 2>/dev/null)"
+    SIZE="$(lsblk -no SIZE "$DEV" 2>/dev/null)"
+
+    DESC="$DEV ($SIZE, $FSTYPE${LABEL:+, label: $LABEL})"
+    read -rp "Auto-mount $DESC at boot? [y/N]: " DO_MOUNT
+    if [[ ! "$DO_MOUNT" =~ ^[Yy] ]]; then
+        continue
+    fi
+
+    DEFAULT_MP="/mnt/$(echo "${LABEL:-$PART_NAME}" | tr '[:upper:] ' '[:lower:]-')"
+    read -rp "Mount point for $DEV [default: $DEFAULT_MP]: " MP
+    MP="${MP:-$DEFAULT_MP}"
+
+    case "$FSTYPE" in
+        ntfs) NIX_FSTYPE="ntfs-3g" ;;
+        *) NIX_FSTYPE="$FSTYPE" ;;
+    esac
+
+    MOUNT_ENTRIES+=("$MP|$UUID|$NIX_FSTYPE")
+done
+
+echo "==> Writing $MOUNT_POINTS_FILE"
+{
+    echo "{ ... }:"
+    echo
+    echo "{"
+    for entry in "${MOUNT_ENTRIES[@]}"; do
+        IFS='|' read -r mp uuid fstype <<< "$entry"
+        echo "  fileSystems.\"$mp\" = {"
+        echo "    device = \"/dev/disk/by-uuid/$uuid\";"
+        echo "    fsType = \"$fstype\";"
+        echo "    options = [ \"nofail\" ];"
+        echo "  };"
+        echo
+    done
+    echo "}"
+} > "$MOUNT_POINTS_FILE"
+
+add_import "$CONFIG_FILE" "./mount-points.nix"
+
+# ---------------------------------------------------------------------------
 # Install
 # ---------------------------------------------------------------------------
 

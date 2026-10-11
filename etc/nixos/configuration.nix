@@ -9,6 +9,7 @@
       ./users.nix
       ./kde.nix
       ./firejail-packages.nix
+      ./mount-points.nix
     ];
 
   # Use the systemd-boot EFI boot loader.

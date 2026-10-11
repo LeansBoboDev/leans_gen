@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
 # manual_update.sh - copies this repo's NixOS config into /etc/nixos,
-# skipping kde.nix, users.nix and configuration.nix (which hold
-# machine-specific settings you don't want overwritten on an
-# already-installed system), and copying only the selected GPU driver
-# file since intel.nix, amd.nix and nvidia.nix cannot coexist.
+# skipping kde.nix, users.nix, configuration.nix and mount-points.nix
+# (which hold machine-specific settings you don't want overwritten on
+# an already-installed system), and copying only the selected GPU
+# driver file since intel.nix, amd.nix and nvidia.nix cannot coexist.
 
 set -euo pipefail
 
@@ -50,7 +50,7 @@ ensure_allow_unfree() {
     echo "Added nixpkgs.config.allowUnfree = true; to $file"
 }
 
-SKIP_FILES=("kde.nix" "users.nix" "configuration.nix")
+SKIP_FILES=("kde.nix" "users.nix" "configuration.nix" "mount-points.nix")
 
 GPU_FILES=("intel.nix" "amd.nix" "nvidia.nix")
 GPU_LABELS=("Intel" "AMD" "NVIDIA" "Skip (do not copy a GPU driver file)")

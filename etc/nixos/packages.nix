@@ -24,6 +24,10 @@
     vlc
     obs-studio
 
+    # Gaming
+    mangohud
+    goverlay
+
 	  # Libraries
 	  direnv # per-project env loading, used by VSCode's direnv extension
 	  speechd # speech-dispatcher, needed by Vesktop's text-to-speech feature

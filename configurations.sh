@@ -345,6 +345,31 @@ echo "==> Writing $MOUNT_POINTS_FILE"
 add_import "$CONFIG_FILE" "./mount-points.nix"
 
 # ---------------------------------------------------------------------------
+# Home Manager channel
+# ---------------------------------------------------------------------------
+# home.nix imports <home-manager/nixos>, which requires root to have a
+# "home-manager" channel added. nixos-install copies root's channels into
+# the new system, so this must be added before installing.
+
+echo
+echo "==> Setting up the home-manager channel"
+
+if nix-channel --list | grep -q '^home-manager '; then
+    echo "home-manager channel already present, skipping."
+else
+    NIXOS_CHANNEL_URL="$(nix-channel --list | awk '$1=="nixos"{print $2}')"
+    if [[ "$NIXOS_CHANNEL_URL" == *unstable* ]]; then
+        HM_BRANCH="master"
+    else
+        HM_VERSION="$(echo "$NIXOS_CHANNEL_URL" | grep -oE '[0-9]{2}\.[0-9]{2}')"
+        HM_BRANCH="release-${HM_VERSION:-26.05}"
+    fi
+    echo "Adding home-manager channel (branch: $HM_BRANCH)"
+    nix-channel --add "https://github.com/nix-community/home-manager/archive/${HM_BRANCH}.tar.gz" home-manager
+    nix-channel --update
+fi
+
+# ---------------------------------------------------------------------------
 # Install
 # ---------------------------------------------------------------------------
 

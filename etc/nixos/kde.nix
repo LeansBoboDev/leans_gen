@@ -54,6 +54,13 @@ in
     # Keep in sync with system.stateVersion in configuration.nix.
     home.stateVersion = config.system.stateVersion;
 
+    # KDE Menu Editor doesn't write to any KConfig rc file -- it writes an
+    # XDG menu-spec XML file instead, which rc2nix has no concept of. Not
+    # captured by update-kde-nix.sh; re-copy
+    # ~/.config/menus/applications-kmenuedit.menu here by hand after
+    # editing the menu (see etc/nixos/KDE.md).
+    xdg.configFile."menus/applications-kmenuedit.menu".source = ./kmenuedit.menu;
+
     # `shortcuts`/`configFile` below are generated/refreshed by
     # ../../update-kde-nix.sh (rc2nix under the hood) — re-run it any
     # time to pull in live KDE changes. It does NOT capture panel/widget
@@ -364,6 +371,9 @@ in
         plasmashell."switch to next activity" = [ ];
         plasmashell."switch to previous activity" = [ ];
         plasmashell."toggle do not disturb" = [ ];
+        "services/org.kde.spectacle.desktop".CurrentMonitorScreenShot = [ ];
+        "services/org.kde.spectacle.desktop".OpenWithoutScreenshot = [ ];
+        "services/org.kde.spectacle.desktop"._launch = [ ];
       };
       configFile = {
         baloofilerc."Basic Settings".Indexing-Enabled = false;
@@ -392,6 +402,21 @@ in
         kdeglobals.KDE.SingleClick = true;
         kdeglobals.KDE.contrast = 4;
         kdeglobals.KDE.frameContrast = 0.2;
+        kdeglobals."KFileDialog Settings"."Allow Expansion" = false;
+        kdeglobals."KFileDialog Settings"."Automatically select filename extension" = true;
+        kdeglobals."KFileDialog Settings"."Breadcrumb Navigation" = true;
+        kdeglobals."KFileDialog Settings"."Decoration position" = 2;
+        kdeglobals."KFileDialog Settings"."Show Full Path" = false;
+        kdeglobals."KFileDialog Settings"."Show Inline Previews" = true;
+        kdeglobals."KFileDialog Settings"."Show Preview" = false;
+        kdeglobals."KFileDialog Settings"."Show Speedbar" = true;
+        kdeglobals."KFileDialog Settings"."Show hidden files" = false;
+        kdeglobals."KFileDialog Settings"."Sort by" = "Name";
+        kdeglobals."KFileDialog Settings"."Sort directories first" = true;
+        kdeglobals."KFileDialog Settings"."Sort hidden files last" = false;
+        kdeglobals."KFileDialog Settings"."Sort reversed" = false;
+        kdeglobals."KFileDialog Settings"."Speedbar Width" = 140;
+        kdeglobals."KFileDialog Settings"."View Style" = "DetailTree";
         kdeglobals.WM.activeBackground = "39,44,49";
         kdeglobals.WM.activeBlend = "252,252,252";
         kdeglobals.WM.activeForeground = "252,252,252";
@@ -414,6 +439,8 @@ in
         plasma-localerc.Formats.LANG = "en_US.UTF-8";
         plasmanotifyrc."Applications/firefox".Seen = true;
         plasmanotifyrc.Notifications.PopupPosition = "BottomRight";
+        spectaclerc.ImageSave.translatedScreenshotsFolder = "Screenshots";
+        spectaclerc.VideoSave.translatedScreencastsFolder = "Screencasts";
       };
     };
   };

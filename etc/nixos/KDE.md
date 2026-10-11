@@ -122,6 +122,27 @@ See the example in `kde.nix` and the [plasma-manager
 README](https://github.com/nix-community/plasma-manager#panels) for the
 full `panels` syntax.
 
+## Known limitation: KDE Menu Editor (application menu layout)
+
+Edits made in **KDE Menu Editor** (hiding apps, renaming/moving entries,
+deleting categories, etc.) are **not** captured by `update-kde-nix.sh`
+either, for the same underlying reason as panels: they don't live in any
+KConfig rc file. Instead, KDE Menu Editor writes an XDG menu-spec XML
+file to `~/.config/menus/applications-kmenuedit.menu` — a format rc2nix
+has no concept of at all.
+
+To bake in menu edits:
+
+1. Make your changes in KDE Menu Editor.
+2. Copy the live file over the one in the repo:
+   ```
+   cp ~/.config/menus/applications-kmenuedit.menu etc/nixos/kmenuedit.menu
+   ```
+3. It's referenced from `kde.nix` via
+   `xdg.configFile."menus/applications-kmenuedit.menu".source`, so no
+   further wiring is needed.
+4. Validate and rebuild same as any other manual edit here.
+
 ## After editing
 
 Validate the Nix syntax before committing:

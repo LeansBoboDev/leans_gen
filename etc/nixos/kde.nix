@@ -83,20 +83,49 @@ in
         }
       ];
 
-      # panels = [
-      #   {
-      #     location = "bottom";
-      #     widgets = [
-      #       "org.kde.plasma.kickoff"
-      #       "org.kde.plasma.taskmanager"
-      #       "org.kde.plasma.systemtray"
-      #       "org.kde.plasma.digitalclock"
-      #     ];
-      #   }
-      # ];
+      # Widget/panel layout isn't captured by update-kde-nix.sh (rc2nix doesn't
+      # read plasma-org.kde.plasma.desktop-appletsrc) - hand-written from the
+      # live appletsrc to match the two bottom panels in System Settings.
+      #
+      # Not reproduced here: the live appletsrc has a corrupted group header
+      # (`[Containments24Appletsts][7][General]` instead of
+      # `[Containments][24][Applets][7][General]`) holding the system tray's
+      # shown/hidden icon list, plus an orphaned duplicate nested systemtray
+      # under [Containments][24][Applets][7][7] - both look like leftover
+      # Plasma-version-migration cruft rather than real config, so the tray
+      # below uses defaults. Re-do any "show/hide icon" tweaks via the tray's
+      # configure popup after rebuilding if needed.
+      panels = [
+        {
+          location = "bottom";
+          widgets = [
+            "org.kde.plasma.kickoff"
+            "org.kde.plasma.pager"
+            {
+              iconTasks = {
+                launchers = [
+                  "preferred://browser"
+                  "preferred://filemanager"
+                  "applications:steam.desktop"
+                  "applications:org.kde.konsole.desktop"
+                  "applications:vesktop.desktop"
+                ];
+              };
+            }
+          ];
+        }
+        {
+          location = "bottom";
+          widgets = [
+            "org.kde.plasma.systemtray"
+            "org.kde.plasma.marginsseparator"
+            "org.kde.plasma.digitalclock"
+            "org.kde.plasma.showdesktop"
+          ];
+        }
+      ];
 
       shortcuts = {
-        ActivityManager.switch-to-activity-a5c04327-b9b8-42d8-a301-6f76e30b074e = [ ];
         "KDE Keyboard Layout Switcher"."Switch to Last-Used Keyboard Layout" = "Meta+Alt+L";
         "KDE Keyboard Layout Switcher"."Switch to Next Keyboard Layout" = "Meta+Alt+K";
         kaccess."Toggle Screen Reader On and Off" = "Meta+Alt+S";
@@ -339,9 +368,26 @@ in
       configFile = {
         baloofilerc."Basic Settings".Indexing-Enabled = false;
         baloofilerc.General.dbVersion = 2;
+        dolphinrc.General.ViewPropsTimestamp = "2026,10,11,13,14,55.037";
         dolphinrc."KFileDialog Settings"."Places Icons Auto-resize" = false;
         dolphinrc."KFileDialog Settings"."Places Icons Static Size" = 22;
-        kactivitymanagerdrc.activities.a5c04327-b9b8-42d8-a301-6f76e30b074e = "Default";
+        katerc.General."Days Meta Infos" = 30;
+        katerc.General.PinnedDocuments = "";
+        katerc.General."Save Meta Infos" = true;
+        katerc.General."Show Full Path in Title" = false;
+        katerc.General."Show Menu Bar" = true;
+        katerc.General."Show Status Bar" = true;
+        katerc.General."Show Tab Bar" = true;
+        katerc.General."Show Url Nav Bar" = true;
+        katerc.filetree.editShade = "30,78,103";
+        katerc.filetree.listMode = false;
+        katerc.filetree.middleClickToClose = false;
+        katerc.filetree.shadingEnabled = true;
+        katerc.filetree.showCloseButton = false;
+        katerc.filetree.showFullPathOnRoots = false;
+        katerc.filetree.showToolbar = true;
+        katerc.filetree.sortRole = 0;
+        katerc.filetree.viewShade = "77,46,91";
         kded5rc.Module-device_automounter.autoload = false;
         kdeglobals.KDE.SingleClick = true;
         kdeglobals.KDE.contrast = 4;
@@ -352,16 +398,21 @@ in
         kdeglobals.WM.inactiveBackground = "32,36,40";
         kdeglobals.WM.inactiveBlend = "161,169,177";
         kdeglobals.WM.inactiveForeground = "161,169,177";
+        kiorc.Confirmations.ConfirmDelete = false;
+        kiorc.Confirmations.ConfirmEmptyTrash = false;
         krunnerrc.Plugins.baloosearchEnabled = false;
         kwalletrc.Wallet."First Use" = false;
-        kwinrc.Desktops.Id_1 = "c5553a7f-9255-41ad-9e72-020dfd869b67";
         kwinrc.Desktops.Number = 1;
         kwinrc.Desktops.Rows = 1;
+        kwinrc.NightColor.Active = true;
+        kwinrc.NightColor.Mode = "Constant";
+        kwinrc.NightColor.NightTemperature = 2700;
         kwinrc.Xwayland.Scale = 1;
         kxkbrc.Layout.LayoutList = "br";
         kxkbrc.Layout.Use = true;
         plasma-localerc.Formats.LANG = "en_US.UTF-8";
         plasmanotifyrc."Applications/firefox".Seen = true;
+        plasmanotifyrc.Notifications.PopupPosition = "BottomRight";
       };
     };
   };

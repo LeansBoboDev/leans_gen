@@ -72,13 +72,55 @@ by hand.
 ## Known limitation: panels and widgets
 
 `rc2nix` does **not** capture panel/widget layout
-(`plasma-org.kde.plasma.desktop-appletsrc`) — that file's format isn't
-reliably convertible to plasma-manager's declarative `panels` syntax. If
-you want panel layout reproduced too, write it by hand under
-`programs.plasma.panels = [ ... ];` (see the example in `kde.nix` and the
-[plasma-manager
+(`plasma-org.kde.plasma.desktop-appletsrc`) — that file isn't in its list
+of known rc files at all (checked `rc2nix.py`'s `KNOWN_CONFIG_FILES`), and
+its format isn't reliably convertible to plasma-manager's declarative
+`panels` syntax anyway: it's full of per-install noise (activity UUIDs,
+popup/dialog pixel sizes that change on every open) and, in practice, can
+contain stale cruft from old Plasma-version migrations (see the "watch
+out for" note below). This is a deliberate upstream choice, not a gap
+worth scripting around — a naive dumper would faithfully reproduce the
+noise and the cruft right along with your actual config.
+
+If you add/remove/move a widget, update `programs.plasma.panels` in
+`kde.nix` by hand:
+
+1. Read your live layout:
+   ```
+   cat ~/.config/plasma-org.kde.plasma.desktop-appletsrc
+   ```
+2. For each `[Containments][N]` group that has `plugin=org.kde.panel`,
+   that's one panel. Its `[Containments][N][General]` group has an
+   `AppletOrder=A;B;C` line — that's the widget order for that panel,
+   by applet ID.
+3. For each ID in `AppletOrder`, find
+   `[Containments][N][Applets][<id>]` and read its `plugin=` line to get
+   the widget's plugin ID (e.g. `org.kde.plasma.kickoff`).
+4. Most widgets just go in the `widgets` list as a plain string
+   (the plugin ID). A few have structured options in plasma-manager
+   instead of a raw config dump — check
+   `https://github.com/nix-community/plasma-manager/tree/trunk/modules/widgets`
+   for the widget's `.nix` file (e.g. `icon-tasks.nix`,
+   `system-tray.nix`) to see what's exposed (e.g.
+   `{ iconTasks.launchers = [ ... ]; }` for task manager pinned/launcher
+   icons, pulled from that applet's
+   `[...][Configuration][General].launchers`).
+5. **Watch out for corruption/cruft** before trusting what you read:
+   malformed group headers (e.g. a literal
+   `[Containments24Appletsts][7][General]` instead of the well-formed
+   `[Containments][24][Applets][7][General]`), or an orphaned
+   containment/applet that's never referenced by any `AppletOrder` (e.g.
+   a duplicate systemtray nested one level deeper than the real one).
+   Both have turned up on this machine, are not something you configured
+   on purpose, and shouldn't be reproduced in `kde.nix` — if a group
+   looks malformed or unreferenced, leave it out rather than guessing
+   what it meant to say.
+6. Validate with `nix-instantiate --parse etc/nixos/kde.nix` and sanity
+   check `git diff` before rebuilding, same as any other manual edit here.
+
+See the example in `kde.nix` and the [plasma-manager
 README](https://github.com/nix-community/plasma-manager#panels) for the
-syntax).
+full `panels` syntax.
 
 ## After editing
 

@@ -63,8 +63,32 @@ CONFIGFILE_CONTENT="$WORKDIR/configFile.nix"
 extract_section "shortcuts" "$DUMP" | sed 's/^/  /' > "$SHORTCUTS_CONTENT"
 extract_section "configFile" "$DUMP" | sed 's/^/  /' > "$CONFIGFILE_CONTENT"
 
-if [[ ! -s "$SHORTCUTS_CONTENT" || ! -s "$CONFIGFILE_CONTENT" ]]; then
+count_nonblank() {
+    grep -c '[^[:space:]]' "$1" || true
+}
+
+# rc2nix silently skips any rc file it can't find (e.g. if $HOME is wrong, or
+# this runs outside your real KDE session) and happily prints empty
+# `shortcuts {}` / `configFile {}` blocks with exit code 0. A lone blank line
+# inside such a block is enough to pass a plain "-s" non-empty check, so we
+# instead require the new content to have at least half as many non-blank
+# lines as what's already in kde.nix - a near-empty dump gets caught here
+# instead of silently gutting your real config.
+NEW_SHORTCUTS_LINES="$(count_nonblank "$SHORTCUTS_CONTENT")"
+NEW_CONFIGFILE_LINES="$(count_nonblank "$CONFIGFILE_CONTENT")"
+OLD_SHORTCUTS_LINES="$(extract_section "shortcuts" "$KDE_NIX" | count_nonblank -)"
+OLD_CONFIGFILE_LINES="$(extract_section "configFile" "$KDE_NIX" | count_nonblank -)"
+
+if [[ "$NEW_SHORTCUTS_LINES" -eq 0 || "$NEW_CONFIGFILE_LINES" -eq 0 ]]; then
     echo "Could not extract shortcuts/configFile from rc2nix output - aborting without touching kde.nix." >&2
+    exit 1
+fi
+
+if [[ "$OLD_SHORTCUTS_LINES" -gt 0 && "$NEW_SHORTCUTS_LINES" -lt $((OLD_SHORTCUTS_LINES / 2)) ]] ||
+   [[ "$OLD_CONFIGFILE_LINES" -gt 0 && "$NEW_CONFIGFILE_LINES" -lt $((OLD_CONFIGFILE_LINES / 2)) ]]; then
+    echo "rc2nix output looks suspiciously small (shortcuts: $OLD_SHORTCUTS_LINES -> $NEW_SHORTCUTS_LINES lines, configFile: $OLD_CONFIGFILE_LINES -> $NEW_CONFIGFILE_LINES lines)." >&2
+    echo "This usually means rc2nix couldn't see your real KDE config (wrong \$HOME, sandboxed shell, missing rc files)." >&2
+    echo "Aborting without touching kde.nix - run this script directly in your own terminal, not through an agent's sandbox." >&2
     exit 1
 fi
 

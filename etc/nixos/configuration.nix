@@ -19,6 +19,7 @@
 
   networking.hostName = "leansgen";
   networking.networkmanager.enable = true;
+  networking.firewall.enable = false;
   time.timeZone = "Europe/Amsterdam";
 
   services.libinput.mouse.accelProfile = "flat";

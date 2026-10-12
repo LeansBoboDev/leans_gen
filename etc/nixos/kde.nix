@@ -94,14 +94,16 @@ in
       # read plasma-org.kde.plasma.desktop-appletsrc) - hand-written from the
       # live appletsrc to match the two bottom panels in System Settings.
       #
-      # Not reproduced here: the live appletsrc has a corrupted group header
-      # (`[Containments24Appletsts][7][General]` instead of
-      # `[Containments][24][Applets][7][General]`) holding the system tray's
-      # shown/hidden icon list, plus an orphaned duplicate nested systemtray
-      # under [Containments][24][Applets][7][7] - both look like leftover
-      # Plasma-version-migration cruft rather than real config, so the tray
-      # below uses defaults. Re-do any "show/hide icon" tweaks via the tray's
-      # configure popup after rebuilding if needed.
+      # The systemtray's shown/hidden icon list below was copied by hand from
+      # the live [Containments][24][Applets][7][General] group. Ignore two
+      # other groups in the same appletsrc that look like leftover
+      # Plasma-version-migration cruft, not real config: the corrupted header
+      # `[Containments24Appletsts][7][General]` (stale pre-migration values -
+      # e.g. missing vesktop_status_icon_1), and the orphaned duplicate nested
+      # systemtray under [Containments][24][Applets][7][7]. `knownItems` isn't
+      # reproduced - it's generated at runtime from whichever tray plasmoids
+      # are actually installed, not a user choice, and plasma-manager doesn't
+      # expose it anyway.
       panels = [
         {
           location = "bottom";
@@ -124,7 +126,44 @@ in
         {
           location = "bottom";
           widgets = [
-            "org.kde.plasma.systemtray"
+            {
+              systemTray = {
+                items = {
+                  extra = [
+                    "org.kde.plasma.notifications"
+                    "org.kde.plasma.weather"
+                    "org.kde.plasma.volume"
+                    "org.kde.plasma.brightness"
+                    "org.kde.plasma.devicenotifier"
+                    "org.kde.kscreen"
+                    "org.kde.plasma.keyboardlayout"
+                    "org.kde.plasma.keyboardindicator"
+                    "org.kde.plasma.networkmanagement"
+                    "org.kde.plasma.battery"
+                    "org.kde.plasma.clipboard"
+                    "org.kde.plasma.mediacontroller"
+                    "org.kde.plasma.manage-inputmethod"
+                    "org.kde.plasma.diskquota"
+                  ];
+                  hidden = [
+                    "vesktop_status_icon_1"
+                    "org.kde.plasma.brightness"
+                    "org.kde.plasma.devicenotifier"
+                    "org.kde.kscreen"
+                    "org.kde.plasma.keyboardlayout"
+                    "org.kde.plasma.keyboardindicator"
+                    "org.kde.plasma.battery"
+                    "org.kde.plasma.clipboard"
+                    "org.kde.plasma.mediacontroller"
+                    "org.kde.plasma.manage-inputmethod"
+                    "org.kde.plasma.diskquota"
+                  ];
+                  shown = [
+                    "org.kde.plasma.networkmanagement"
+                  ];
+                };
+              };
+            }
             "org.kde.plasma.marginsseparator"
             "org.kde.plasma.digitalclock"
             "org.kde.plasma.showdesktop"
@@ -426,6 +465,7 @@ in
         kiorc.Confirmations.ConfirmDelete = false;
         kiorc.Confirmations.ConfirmEmptyTrash = false;
         krunnerrc.Plugins.baloosearchEnabled = false;
+        ksmserverrc.General.loginMode = "emptySession";
         kwalletrc.Wallet."First Use" = false;
         kwinrc.Desktops.Number = 2;
         kwinrc.Desktops.Rows = 1;

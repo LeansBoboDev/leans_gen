@@ -22,7 +22,11 @@
 
     # Multimedia
     vlc
-    obs-studio
+    (wrapOBS {
+      plugins = with obs-studio-plugins; [
+        obs-pipewire-audio-capture
+      ];
+    })
 
     # Gaming
     mangohud

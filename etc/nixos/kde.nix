@@ -462,6 +462,7 @@ in
         kdeglobals.WM.inactiveBackground = "32,36,40";
         kdeglobals.WM.inactiveBlend = "161,169,177";
         kdeglobals.WM.inactiveForeground = "161,169,177";
+        kcminputrc.Keyboard.NumLock = 0; # 0 = turn on at session start, 1 = off, 2 = leave unchanged
         kiorc.Confirmations.ConfirmDelete = false;
         kiorc.Confirmations.ConfirmEmptyTrash = false;
         krunnerrc.Plugins.baloosearchEnabled = false;

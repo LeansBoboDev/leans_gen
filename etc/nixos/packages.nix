@@ -3,6 +3,7 @@
 {
 	services.desktopManager.plasma6.enable = true;
 	services.displayManager.sddm.enable = true;
+	services.displayManager.sddm.autoNumlock = true;
 	services.xserver.enable = true;
 
 	virtualisation.virtualbox.host.enable = true;

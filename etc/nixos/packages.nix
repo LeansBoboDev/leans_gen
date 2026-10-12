@@ -8,6 +8,17 @@
 	virtualisation.virtualbox.host.enable = true;
 
 	programs.nix-ld.enable = true;
+	programs.appimage = {
+	  enable = true;
+	  binfmt = true;
+	};
+
+	environment.sessionVariables = {
+	  # WebKitGTK's DMA-BUF renderer crashes with EGL_SUCCESS/no-display errors
+	  # on the NVIDIA proprietary driver under Wayland. Affects Tauri apps
+	  # (e.g. Samira) and other webkit2gtk-based software.
+	  WEBKIT_DISABLE_DMABUF_RENDERER = "1";
+	};
 
   environment.systemPackages = with pkgs; [
     # Browsers
@@ -21,7 +32,6 @@
     git
     unzip
     p7zip
-    appimage-run
 
     # Multimedia
     vlc

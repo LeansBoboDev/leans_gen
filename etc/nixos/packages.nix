@@ -7,6 +7,8 @@
 
 	virtualisation.virtualbox.host.enable = true;
 
+	programs.nix-ld.enable = true;
+
   environment.systemPackages = with pkgs; [
     # Browsers
     firefox
@@ -19,6 +21,7 @@
     git
     unzip
     p7zip
+    appimage-run
 
     # Multimedia
     vlc

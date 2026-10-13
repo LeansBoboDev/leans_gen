@@ -83,7 +83,9 @@ let
     };
 
     godot = {
-      package = pkgs.godot;
+      # pkgs.godot (the generic alias) still points at 4.6 on the nixos-26.05
+      # channel -- 4.7 is packaged, just not yet aliased as the default.
+      package = pkgs.godot_4_7;
       binary = "godot";
       fakeHomeRel = ".local/share/godot-home";
       migrate = [ ".cache/godot" ".config/godot" ".local/share/godot" ];

@@ -165,7 +165,12 @@ in
               };
             }
             "org.kde.plasma.marginsseparator"
-            "org.kde.plasma.digitalclock"
+            {
+              digitalClock = {
+                date.enable = false;
+                time.format = "24h";
+              };
+            }
             "org.kde.plasma.showdesktop"
           ];
         }

@@ -82,6 +82,13 @@ let
       extraEnv = [ "KWIN_WAYLAND_NO_PERMISSION_CHECKS=1" ];
     };
 
+    godot = {
+      package = pkgs.godot;
+      binary = "godot";
+      fakeHomeRel = ".local/share/godot-home";
+      migrate = [ ".cache/godot" ".config/godot" ".local/share/godot" ];
+    };
+
     moonlight = {
       package = pkgs.moonlight-qt;
       binary = "moonlight";

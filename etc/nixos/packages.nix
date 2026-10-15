@@ -32,7 +32,9 @@
     htop
     git
     unzip
+    zip
     p7zip
+    python3
 
     # Multimedia
     vlc

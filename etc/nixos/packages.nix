@@ -36,6 +36,7 @@
 
     # Multimedia
     vlc
+    blender
     (wrapOBS {
       plugins = with obs-studio-plugins; [
         obs-pipewire-audio-capture

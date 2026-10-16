@@ -61,6 +61,27 @@ in
     # editing the menu (see etc/nixos/KDE.md).
     xdg.configFile."menus/applications-kmenuedit.menu".source = ./kmenuedit.menu;
 
+    # Flameshot preferences, captured by hand from ~/.config/flameshot/flameshot.ini
+    # (not covered by update-kde-nix.sh / rc2nix, since it's not a KConfig app).
+    # `enable = true` also makes home-manager autostart the flameshot tray daemon
+    # via a systemd user service.
+    services.flameshot = {
+      enable = true;
+      settings = {
+        General = {
+          contrastOpacity = 188;
+          disabledTrayIcon = true;
+          savePath = "/home/leans/Pictures/Screenshots";
+          showDesktopNotification = false;
+          showHelp = false;
+          showSelectionGeometryHideTime = 3000;
+          # Right-click context-menu button layout, serialized by Qt as a
+          # QVariant(QList<int>) blob - copied verbatim, not hand-editable.
+          buttons = ''@Variant(\0\0\0\x7f\0\0\0\vQList<int>\0\0\0\0\f\0\0\0\0\0\0\0\x1\0\0\0\x2\0\0\0\x3\0\0\0\x5\0\0\0\x12\0\0\0\b\0\0\0\t\0\0\0\x10\0\0\0\n\0\0\0\v\0\0\0\f)'';
+        };
+      };
+    };
+
     # `shortcuts`/`configFile` below are generated/refreshed by
     # ../../update-kde-nix.sh (rc2nix under the hood) — re-run it any
     # time to pull in live KDE changes. It does NOT capture panel/widget

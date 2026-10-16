@@ -39,6 +39,7 @@
     # Multimedia
     vlc
     blender
+    flameshot
     (wrapOBS {
       plugins = with obs-studio-plugins; [
         obs-pipewire-audio-capture

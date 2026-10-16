@@ -9,6 +9,23 @@
 	virtualisation.virtualbox.host.enable = true;
 
 	programs.nix-ld.enable = true;
+	programs.nix-ld.libraries = with pkgs; [
+	  libx11
+	  libxcursor
+	  libxext
+	  libxrandr
+	  libxinerama
+	  libxi
+	  libxrender
+	  libxfixes
+	  wayland
+	  libxkbcommon
+	  libdecor
+	  libglvnd      # libGL / libEGL
+	  vulkan-loader
+	  alsa-lib
+	  pulseaudio    # fornece libpulse.so, usado pelo compat do PipeWire
+	];
 	programs.appimage = {
 	  enable = true;
 	  binfmt = true;

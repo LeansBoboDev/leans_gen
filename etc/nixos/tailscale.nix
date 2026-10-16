@@ -11,4 +11,28 @@
     enable = true;
     extraDaemonFlags = [ "--tun=userspace-networking" ];
   };
+
+  # Userspace networking means tailscaled never needs CAP_NET_ADMIN or raw
+  # kernel network access -- it only opens regular UDP/TCP sockets. These
+  # merge on top of the serviceConfig the tailscale module already sets
+  # (StateDirectory/RuntimeDirectory etc.), so state/socket paths stay
+  # writable; this just drops everything else it doesn't need. Test with
+  # `nixos-rebuild test` before `switch` -- if tailscaled fails to start,
+  # the empty CapabilityBoundingSet is the first thing to loosen.
+  systemd.services.tailscaled.serviceConfig = {
+    CapabilityBoundingSet = [ ];
+    NoNewPrivileges = true;
+    ProtectHome = true;
+    ProtectKernelModules = true;
+    ProtectKernelTunables = true;
+    ProtectKernelLogs = true;
+    ProtectClock = true;
+    ProtectHostname = true;
+    ProtectControlGroups = true;
+    RestrictNamespaces = true;
+    RestrictRealtime = true;
+    RestrictSUIDSGID = true;
+    LockPersonality = true;
+    MemoryDenyWriteExecute = true;
+  };
 }

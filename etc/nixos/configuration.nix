@@ -11,6 +11,7 @@
       ./firejail-packages.nix
       ./mount-points.nix
       ./tailscale.nix
+      ./ssh.nix
       ./home.nix
     ];
 
@@ -20,7 +21,7 @@
 
   networking.hostName = "leansgen";
   networking.networkmanager.enable = true;
-  networking.firewall.enable = false;
+  networking.firewall.enable = true;
   time.timeZone = "Europe/Amsterdam";
 
   services.libinput.mouse.accelProfile = "flat";

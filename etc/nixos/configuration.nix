@@ -10,6 +10,7 @@
       ./kde.nix
       ./firejail-packages.nix
       ./mount-points.nix
+      ./tailscale.nix
       ./home.nix
     ];
 

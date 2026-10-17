@@ -55,6 +55,7 @@
     p7zip
     python3
     docker
+    opencode
 
     # Multimedia
     vlc

@@ -55,7 +55,10 @@
     p7zip
     python3
     docker
-    opencode
+    nodejs
+    # nixpkgs' opencode lags upstream (which ships new releases multiple times a week),
+    # so always resolve to the latest published version via npm instead of pinning.
+    (writeShellScriptBin "opencode" ''exec ${nodejs}/bin/npx -y opencode-ai@latest "$@"'')
 
     # Multimedia
     vlc

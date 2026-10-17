@@ -127,6 +127,40 @@ let
     };
   };
 
+  # Flatpak apps don't fit the HOME-redirect pattern above: each one already
+  # gets its own isolated $HOME under ~/.var/app/<app-id>, enforced by
+  # Flatpak's own bubblewrap sandbox -- there's no dotfolder to migrate and
+  # no shared real-$HOME leakage to prevent. What's missing is everything
+  # *outside* that per-app directory: by default a Flatpak app can still see
+  # the network, talk to the session bus, and (depending on its declared
+  # permissions) read arbitrary paths it's been granted. Layering firejail
+  # on top of `flatpak run` adds a second, independent sandbox for that --
+  # one wrapper here covers every installed Flatpak app, with no per-app
+  # entry needed.
+  #
+  # Only the `run` subcommand is routed through firejail; `install`,
+  # `update`, `list`, etc. pass straight through to the real flatpak binary
+  # so they keep the network/portal access they need to manage apps at all.
+  # --noprofile skips firejail's bundled flatpak.profile (if any) the same
+  # way steam/vesktop/sunshine skip theirs above -- nesting firejail's own
+  # namespaces around bubblewrap's is finicky enough without an extra layer
+  # of seccomp/device restrictions fighting the inner sandbox.
+  flatpakWrapper =
+    (pkgs.writeShellScriptBin "flatpak" ''
+      set -e
+      if [ "$1" = "run" ]; then
+        shift
+        exec /run/wrappers/bin/firejail --noprofile -- ${lib.getBin pkgs.flatpak}/bin/flatpak run "$@"
+      else
+        exec ${lib.getBin pkgs.flatpak}/bin/flatpak "$@"
+      fi
+    '').overrideAttrs
+      (old: {
+        meta = old.meta // {
+          priority = -1;
+        };
+      });
+
   # Each app's .desktop file launches it via a bare command name (e.g.
   # `Exec=code %F`), resolved through $PATH -- so it picks up the wrapper
   # below automatically, with no need to copy/patch any .desktop file.
@@ -169,5 +203,6 @@ in
 
   environment.systemPackages =
     (lib.mapAttrsToList (_: app: app.package) firejailHomeApps)
-    ++ (lib.mapAttrsToList mkWrapper firejailHomeApps);
+    ++ (lib.mapAttrsToList mkWrapper firejailHomeApps)
+    ++ [ flatpakWrapper ];
 }

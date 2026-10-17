@@ -5,8 +5,10 @@
 	services.displayManager.sddm.enable = true;
 	services.displayManager.sddm.autoNumlock = true;
 	services.xserver.enable = true;
+	services.flatpak.enable = true;
 
 	virtualisation.virtualbox.host.enable = true;
+	virtualisation.docker.enable = true;
 
 	programs.nix-ld.enable = true;
 	programs.nix-ld.libraries = with pkgs; [
@@ -52,6 +54,7 @@
     zip
     p7zip
     python3
+    docker
 
     # Multimedia
     vlc

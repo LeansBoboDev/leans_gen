@@ -63,6 +63,7 @@
     # Multimedia
     vlc
     blender
+    blockbench
     flameshot
     (wrapOBS {
       plugins = with obs-studio-plugins; [

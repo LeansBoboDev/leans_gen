@@ -9,6 +9,7 @@
 
 	virtualisation.virtualbox.host.enable = true;
 	virtualisation.docker.enable = true;
+	hardware.nvidia-container-toolkit.enable = true;
 
 	programs.nix-ld.enable = true;
 	programs.nix-ld.libraries = with pkgs; [

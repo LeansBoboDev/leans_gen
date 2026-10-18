@@ -65,6 +65,7 @@
     vlc
     blender
     blockbench
+    gimp
     flameshot
     (wrapOBS {
       plugins = with obs-studio-plugins; [

@@ -66,6 +66,7 @@
     blender
     blockbench
     gimp
+    audacity
     flameshot
     (wrapOBS {
       plugins = with obs-studio-plugins; [

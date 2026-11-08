@@ -88,7 +88,7 @@ in
     # layout (plasma-org.kde.plasma.desktop-appletsrc) — add that by
     # hand under `panels = [ ... ];` below if you want panels/widgets
     # reproduced too.
-    # Last refreshed: 2026-10-12
+    # Last refreshed: 2026-11-08
     programs.plasma = {
       enable = true;
 
@@ -187,8 +187,17 @@ in
             }
             "org.kde.plasma.marginsseparator"
             {
+              # From the live [Containments][24][Applets][19][Configuration][Appearance]
+              # group: dateDisplayFormat=BesideTime, use24hFormat=2. `showDate` isn't
+              # written there at all, so it sits at Plasma's default (true) - setting a
+              # date position only makes sense with the date on, hence enable = true.
+              # fontFamily=Noto Sans / fontWeight=400 are left out: those are Plasma's
+              # own defaults written back verbatim, not a choice worth pinning.
               digitalClock = {
-                date.enable = false;
+                date = {
+                  enable = true;
+                  position = "besideTime";
+                };
                 time.format = "24h";
               };
             }
@@ -436,8 +445,8 @@ in
         plasmashell."switch to next activity" = [ ];
         plasmashell."switch to previous activity" = [ ];
         plasmashell."toggle do not disturb" = [ ];
-        "services/org.kde.spectacle.desktop".CurrentMonitorScreenShot = [ ];
-        "services/org.kde.spectacle.desktop".OpenWithoutScreenshot = [ ];
+        "services/org.flameshot.Flameshot.desktop".Capture = "Print";
+        "services/org.kde.krunner.desktop"._launch = ["Alt+F2" "Search"];
         "services/org.kde.spectacle.desktop"._launch = [ ];
       };
       configFile = {
@@ -463,13 +472,14 @@ in
         katerc.filetree.showToolbar = true;
         katerc.filetree.sortRole = 0;
         katerc.filetree.viewShade = "77,46,91";
+        kded5rc.Module-browserintegrationreminder.autoload = false;
         kded5rc.Module-device_automounter.autoload = false;
         kdeglobals.KDE.SingleClick = true;
         kdeglobals.KDE.contrast = 4;
         kdeglobals.KDE.frameContrast = 0.2;
         kdeglobals."KFileDialog Settings"."Allow Expansion" = false;
         kdeglobals."KFileDialog Settings"."Automatically select filename extension" = true;
-        kdeglobals."KFileDialog Settings"."Breadcrumb Navigation" = true;
+        kdeglobals."KFileDialog Settings"."Breadcrumb Navigation" = false;
         kdeglobals."KFileDialog Settings"."Decoration position" = 2;
         kdeglobals."KFileDialog Settings"."Show Full Path" = false;
         kdeglobals."KFileDialog Settings"."Show Inline Previews" = true;
@@ -481,14 +491,13 @@ in
         kdeglobals."KFileDialog Settings"."Sort hidden files last" = false;
         kdeglobals."KFileDialog Settings"."Sort reversed" = false;
         kdeglobals."KFileDialog Settings"."Speedbar Width" = 140;
-        kdeglobals."KFileDialog Settings"."View Style" = "DetailTree";
+        kdeglobals."KFileDialog Settings"."View Style" = "Simple";
         kdeglobals.WM.activeBackground = "39,44,49";
         kdeglobals.WM.activeBlend = "252,252,252";
         kdeglobals.WM.activeForeground = "252,252,252";
         kdeglobals.WM.inactiveBackground = "32,36,40";
         kdeglobals.WM.inactiveBlend = "161,169,177";
         kdeglobals.WM.inactiveForeground = "161,169,177";
-        kcminputrc.Keyboard.NumLock = 0; # 0 = turn on at session start, 1 = off, 2 = leave unchanged
         kiorc.Confirmations.ConfirmDelete = false;
         kiorc.Confirmations.ConfirmEmptyTrash = false;
         krunnerrc.Plugins.baloosearchEnabled = false;
@@ -496,6 +505,7 @@ in
         kwalletrc.Wallet."First Use" = false;
         kwinrc.Desktops.Number = 2;
         kwinrc.Desktops.Rows = 1;
+        kwinrc.Effect-overview.BorderActivate = 9;
         kwinrc.NightColor.Active = true;
         kwinrc.NightColor.Mode = "Constant";
         kwinrc.NightColor.NightTemperature = 2700;
@@ -504,8 +514,11 @@ in
         kxkbrc.Layout.LayoutList = "br";
         kxkbrc.Layout.Use = true;
         plasma-localerc.Formats.LANG = "en_US.UTF-8";
+        plasmanotifyrc."Applications/com.obsproject.Studio".Seen = true;
         plasmanotifyrc."Applications/firefox".Seen = true;
+        plasmanotifyrc."Applications/vesktop".Seen = true;
         plasmanotifyrc.Notifications.PopupPosition = "BottomRight";
+        spectaclerc.ImageSave.lastImageSaveLocation = "file:///home/leans/Pictures/Screenshots/Screenshot_20261015_205052.png";
         spectaclerc.ImageSave.translatedScreenshotsFolder = "Screenshots";
         spectaclerc.VideoSave.translatedScreencastsFolder = "Screencasts";
       };

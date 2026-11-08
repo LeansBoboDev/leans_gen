@@ -66,6 +66,7 @@
     blender
     blockbench
     gimp
+    krita
     audacity
     flameshot
     (wrapOBS {
@@ -78,8 +79,8 @@
     mangohud
     goverlay
 
-	  # Libraries
-	  direnv # per-project env loading, used by VSCode's direnv extension
-	  speechd # speech-dispatcher, needed by Vesktop's text-to-speech feature
+    # Libraries
+    direnv # per-project env loading, used by VSCode's direnv extension
+    speechd # speech-dispatcher, needed by Vesktop's text-to-speech feature
   ];
 }
